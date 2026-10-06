@@ -145,7 +145,7 @@ export default function DashboardClient({
         async (decodedText) => {
           setScannerResult(decodedText)
           if (scanner) {
-            scanner.clear().catch(() => {})
+            scanner.clear().catch(() => { })
           }
           setShowScanner(false)
 
@@ -159,13 +159,13 @@ export default function DashboardClient({
             }
           }
         },
-        (_error) => {}
+        (_error) => { }
       )
     }
 
     return () => {
       if (scanner) {
-        scanner.clear().catch(() => {})
+        scanner.clear().catch(() => { })
       }
     }
   }, [showScanner, selectedInvId])
@@ -326,11 +326,10 @@ export default function DashboardClient({
               <button
                 key={tab.id}
                 onClick={() => setActivePanel(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-xs md:text-sm transition ${
-                  isActive
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-xs md:text-sm transition ${isActive
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-border'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
@@ -463,12 +462,11 @@ export default function DashboardClient({
                             <td className="p-3"><span className="bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded">{g.session}</span></td>
                             <td className="p-3">{g.pax} org</td>
                             <td className="p-3">
-                              <span className={`text-xs px-2 py-1 rounded font-semibold ${
-                                g.status === 'hadir' ? 'bg-emerald-100 text-emerald-800' :
-                                g.status === 'ragu' ? 'bg-amber-100 text-amber-800' :
-                                g.status === 'tidak_hadir' ? 'bg-rose-100 text-rose-800' :
-                                'bg-slate-100 text-slate-600'
-                              }`}>
+                              <span className={`text-xs px-2 py-1 rounded font-semibold ${g.status === 'hadir' ? 'bg-emerald-100 text-emerald-800' :
+                                  g.status === 'ragu' ? 'bg-amber-100 text-amber-800' :
+                                    g.status === 'tidak_hadir' ? 'bg-rose-100 text-rose-800' :
+                                      'bg-slate-100 text-slate-600'
+                                }`}>
                                 {g.status}
                               </span>
                             </td>

@@ -2,12 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
   PenTool,
   Library,
-  LogOut,
   Sparkles,
   ExternalLink
 } from 'lucide-react'
@@ -21,13 +19,6 @@ const navItems = [
 
 export default function DashboardSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
 
   return (
     <aside className="w-64 bg-white border-r border-border min-h-[calc(100vh-3.5rem)] flex flex-col justify-between hidden md:flex shrink-0">
@@ -45,8 +36,8 @@ export default function DashboardSidebar() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center justify-between px-3 py-2 text-sm font-medium rounded-xl transition ${isActive
-                      ? 'bg-blue-50 text-blue-600 font-semibold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                 >
                   <div className="flex items-center gap-2.5">

@@ -24,7 +24,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <DashboardSidebar />
           <main className="flex-1 overflow-x-hidden">{children}</main>
         </div>
-        <DashboardFooter />
       </div>
     )
   }
