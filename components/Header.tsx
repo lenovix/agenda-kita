@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Menu, X, Sparkles, ArrowRight } from 'lucide-react'
+import { Menu, X, Sparkles } from 'lucide-react'
+import AuthMenu from '@/components/AuthMenu'
 
 const navItems = [
-  { href: '/', label: 'Home' },
+  { href: '/home', label: 'Home' },
   { href: '/dashboard', label: 'Studio' },
   { href: '/templates', label: 'Templates' },
   { href: '/pricelist', label: 'Pricelist' },
@@ -23,7 +23,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Brand Logo */}
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-2 font-bold text-xl tracking-tight transition hover:opacity-90"
         >
           <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -55,11 +55,7 @@ export default function Header() {
 
         {/* Right CTA Button (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
-          <Button size="sm" className="rounded-full shadow-sm hover:shadow px-5">
-            <Link href="/templates" className="flex items-center gap-1.5">
-              Pilih Tema <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </Button>
+          <AuthMenu />
         </div>
 
         {/* Hamburger Button (Mobile) */}
@@ -96,11 +92,7 @@ export default function Header() {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full rounded-xl" onClick={() => setOpen(false)}>
-              <Link href="/templates" className="flex items-center justify-center gap-2">
-                Mulai Buat Undangan <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
+            <AuthMenu />
           </div>
         </div>
       )}

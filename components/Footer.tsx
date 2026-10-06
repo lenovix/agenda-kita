@@ -28,7 +28,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Info */}
           <div className="md:col-span-2 space-y-4">
-            <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl tracking-tight">
+            <Link href="/home" className="inline-flex items-center gap-2 font-bold text-xl tracking-tight">
               <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>

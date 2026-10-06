@@ -6,7 +6,7 @@ import Footer from './Footer'
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const hide = pathname?.match(/^\/templates\/template-/)
+  const hide = pathname?.match(/^\/templates\/template-/) || pathname?.match(/^\/dashboard\/dashboard-/)
 
   if (hide) return <>{children}</>
 

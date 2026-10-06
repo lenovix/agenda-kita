@@ -20,6 +20,31 @@ CREATE TABLE IF NOT EXISTS public.templates (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Table: invitations (undangan user)
+CREATE TABLE IF NOT EXISTS public.invitations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  couple_name_male TEXT NOT NULL,
+  couple_name_female TEXT NOT NULL,
+  wedding_date DATE NOT NULL,
+  location TEXT,
+  category TEXT DEFAULT 'Romantic',
+  selected_template TEXT DEFAULT '001',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.invitations ENABLE ROW LEVEL SECURITY;
+
+-- Policy: user hanya bisa lihat & kelola undangan sendiri
+CREATE POLICY "Users can view own invitations" ON public.invitations
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own invitations" ON public.invitations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own invitations" ON public.invitations
+  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own invitations" ON public.invitations
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- Table: contacts
 CREATE TABLE IF NOT EXISTS public.contacts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
