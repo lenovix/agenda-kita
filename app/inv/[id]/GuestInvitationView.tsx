@@ -157,149 +157,169 @@ export default function GuestInvitationView({
 
       <div className="max-w-4xl mx-auto px-4 py-12 space-y-16">
         {/* Countdown & Calendar */}
-        <section className="text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 flex items-center justify-center gap-2">
-            <Sparkles className="w-6 h-6" /> Hitungan Mundur
-          </h2>
-          <CountdownTimer targetDate={weddingDateTime} />
-          <div className="pt-2">
-            <AddToCalendar
-              title={`Pernikahan ${invitation.couple_name_male} & ${invitation.couple_name_female}`}
-              description={invitation.story || 'Kami mengundang Anda untuk hadir di pernikahan kami.'}
-              location={invitation.location || ''}
-              startDate={weddingDateTime}
-            />
-          </div>
-        </section>
+        {(extras.showCountdown !== false || extras.showCalendarBtn !== false) && (
+          <section className="text-center space-y-6">
+            {extras.showCountdown !== false && (
+              <>
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 flex items-center justify-center gap-2">
+                  <Sparkles className="w-6 h-6" /> Hitungan Mundur
+                </h2>
+                <CountdownTimer targetDate={weddingDateTime} />
+              </>
+            )}
+            {extras.showCalendarBtn !== false && (
+              <div className="pt-2">
+                <AddToCalendar
+                  title={`Pernikahan ${invitation.couple_name_male} & ${invitation.couple_name_female}`}
+                  description={invitation.story || 'Kami mengundang Anda untuk hadir di pernikahan kami.'}
+                  location={invitation.location || ''}
+                  startDate={weddingDateTime}
+                />
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Mempelai & Orang Tua */}
-        <section>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-4">
-            Mempelai
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="bg-white/85 backdrop-blur border-rose-200 text-center">
-              <CardHeader>
-                <CardTitle className="text-2xl text-rose-600">{invitation.couple_name_male}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {invitation.groom_parents && (
-                  <p className="text-sm text-slate-600 italic font-serif">Putra dari {invitation.groom_parents}</p>
-                )}
-              </CardContent>
-            </Card>
-            <Card className="bg-white/85 backdrop-blur border-rose-200 text-center">
-              <CardHeader>
-                <CardTitle className="text-2xl text-rose-600">{invitation.couple_name_female}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {invitation.bride_parents && (
-                  <p className="text-sm text-slate-600 italic font-serif">Putri dari {invitation.bride_parents}</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+        {extras.showGroomBride !== false && (
+          <section>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-4">
+              Mempelai
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="bg-white/85 backdrop-blur border-rose-200 text-center">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-rose-600">{invitation.couple_name_male}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {invitation.groom_parents && (
+                    <p className="text-sm text-slate-600 italic font-serif">Putra dari {invitation.groom_parents}</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="bg-white/85 backdrop-blur border-rose-200 text-center">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-rose-600">{invitation.couple_name_female}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {invitation.bride_parents && (
+                    <p className="text-sm text-slate-600 italic font-serif">Putri dari {invitation.bride_parents}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
 
         {/* Acara */}
-        <section>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-4">
-            Acara Pernikahan
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="bg-white/85 backdrop-blur border-rose-200">
-              <CardHeader>
-                <CardTitle className="text-xl text-rose-600 flex items-center gap-2">
-                  <CalendarDays className="w-5 h-5" /> Akad Nikah
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm text-slate-600">{weddingDateLong}</p>
-                <p className="font-semibold">{invitation.akad_time || 'TBA'}</p>
-                <p className="text-sm text-slate-600">{invitation.location}</p>
-                {invitation.maps_url && (
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => window.open(invitation.maps_url!)}>
-                    <MapPin className="w-3.5 h-3.5" /> Lihat di Maps
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+        {extras.showEvents !== false && (
+          <section>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-4">
+              Acara Pernikahan
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="bg-white/85 backdrop-blur border-rose-200">
+                <CardHeader>
+                  <CardTitle className="text-xl text-rose-600 flex items-center gap-2">
+                    <CalendarDays className="w-5 h-5" /> Akad Nikah
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-slate-600">{weddingDateLong}</p>
+                  <p className="font-semibold">{invitation.akad_time || 'TBA'}</p>
+                  <p className="text-sm text-slate-600">{invitation.location}</p>
+                  {invitation.maps_url && (
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => window.open(invitation.maps_url!)}>
+                      <MapPin className="w-3.5 h-3.5" /> Lihat di Maps
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card className="bg-white/85 backdrop-blur border-rose-200">
-              <CardHeader>
-                <CardTitle className="text-xl text-rose-600 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" /> Resepsi
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm text-slate-600">{weddingDateLong}</p>
-                <p className="font-semibold">{invitation.reception_time || 'TBA'}</p>
-                <p className="text-sm text-slate-600">{invitation.location}</p>
-                {invitation.maps_url && (
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => window.open(invitation.maps_url!)}>
-                    <MapPin className="w-3.5 h-3.5" /> Lihat di Maps
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {invitation.story && (
-            <Card className="bg-white/70 backdrop-blur border-rose-100 mt-6 text-center">
-              <CardContent className="pt-6">
-                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Cerita Cinta</p>
-                <p className="text-sm text-slate-700 italic leading-relaxed">{invitation.story}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {invitation.quote && (
-            <div className="mt-6 p-4 bg-white/60 rounded-2xl border border-rose-200 text-center">
-              <p className="text-sm italic text-slate-600">{invitation.quote}</p>
+              <Card className="bg-white/85 backdrop-blur border-rose-200">
+                <CardHeader>
+                  <CardTitle className="text-xl text-rose-600 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5" /> Resepsi
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-slate-600">{weddingDateLong}</p>
+                  <p className="font-semibold">{invitation.reception_time || 'TBA'}</p>
+                  <p className="text-sm text-slate-600">{invitation.location}</p>
+                  {invitation.maps_url && (
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => window.open(invitation.maps_url!)}>
+                      <MapPin className="w-3.5 h-3.5" /> Lihat di Maps
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </section>
+
+            {extras.showStory !== false && invitation.story && (
+              <Card className="bg-white/70 backdrop-blur border-rose-100 mt-6 text-center">
+                <CardContent className="pt-6">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Cerita Cinta</p>
+                  <p className="text-sm text-slate-700 italic leading-relaxed">{invitation.story}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {extras.showQuote !== false && invitation.quote && (
+              <div className="mt-6 p-4 bg-white/60 rounded-2xl border border-rose-200 text-center">
+                <p className="text-sm italic text-slate-600">{invitation.quote}</p>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* RSVP */}
-        <section>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6">
-            Konfirmasi Kehadiran
-          </h2>
-          <RsvpForm onSubmitRsvp={handleRsvp} />
-        </section>
+        {extras.showRsvp !== false && (
+          <section>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6">
+              Konfirmasi Kehadiran
+            </h2>
+            <RsvpForm onSubmitRsvp={handleRsvp} />
+          </section>
+        )}
 
         {/* Buku Tamu & Doa */}
-        <section>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6 flex items-center justify-center gap-2">
-            <MessageSquareHeart className="w-6 h-6" /> Buku Tamu & Ucapan
-          </h2>
-          <GuestbookSection initialWishes={initialWishes} onSubmitWish={handleWish} />
-        </section>
+        {extras.showGuestbook !== false && (
+          <section>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6 flex items-center justify-center gap-2">
+              <MessageSquareHeart className="w-6 h-6" /> Buku Tamu & Ucapan
+            </h2>
+            <GuestbookSection initialWishes={initialWishes} onSubmitWish={handleWish} />
+          </section>
+        )}
 
         {/* Protokol / Dresscode */}
-        <section>
-          <EventProtocol
-            dressCode={extras.dress_code || 'Formal / Batik / Kebaya'}
-            colorPalette={extras.dress_colors || ['#F9A8D4', '#FBCFE8', '#E2E8F0']}
-            instructions={extras.protocol_notes || [
-              'Mohon hadir 15 menit sebelum acara dimulai.',
-              'Menjaga ketertiban dan kekhusyukan selama prosesi akad nikah.',
-              'Dih Taxon respeito telah memberi贡献持有人 Two hours ahead. ',
-            ]}
-          />
-        </section>
+        {extras.showProtocol !== false && (
+          <section>
+            <EventProtocol
+              dressCode={extras.dress_code || 'Formal / Batik / Kebaya'}
+              colorPalette={extras.dress_colors || ['#F9A8D4', '#FBCFE8', '#E2E8F0']}
+              instructions={extras.protocol_notes || [
+                'Mohon hadir 15 menit sebelum acara dimulai.',
+                'Menjaga ketertiban dan kekhusyukan selama prosesi akad nikah.',
+                'Dihimbau tidak mengambil foto flash dari jarak dekat.',
+              ]}
+            />
+          </section>
+        )}
 
         {/* Amplop Digital */}
-        <section>
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6">
-            Amplop Digital
-          </h2>
-          <DigitalEnvelope
-            banks={extras.banks || []}
-            qrisImage={extras.qris_image || ''}
-            shippingAddress={extras.shipping_address || ''}
-          />
-        </section>
+        {extras.showGift !== false && (
+          <section>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-rose-600 text-center mb-6">
+              Amplop Digital
+            </h2>
+            <DigitalEnvelope
+              banks={extras.banks || []}
+              qrisImage={extras.qris_image || ''}
+              shippingAddress={extras.shipping_address || ''}
+            />
+          </section>
+        )}
 
         {/* Footer */}
         <footer className="text-center py-12 border-t border-rose-200">

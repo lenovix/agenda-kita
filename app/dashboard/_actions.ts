@@ -67,7 +67,15 @@ export async function updateInvitation(formData: FormData) {
   const id = formData.get('id') as string
   if (!id || id.trim() === '') return { error: 'Pilih undangan terlebih dahulu di Dashboard.' }
 
-  const updates: Record<string, string | null> = {
+  const extrasRaw = formData.get('extras') as string
+  let extras = {}
+  try {
+    if (extrasRaw) extras = JSON.parse(extrasRaw)
+  } catch {
+    extras = {}
+  }
+
+  const updates: Record<string, any> = {
     couple_name_male: ((formData.get('couple_name_male') as string) || (formData.get('couple_name_male_val') as string) || '').trim(),
     groom_parents: ((formData.get('groom_parents') as string) || null),
     couple_name_female: ((formData.get('couple_name_female') as string) || (formData.get('couple_name_female_val') as string) || '').trim(),
@@ -83,6 +91,7 @@ export async function updateInvitation(formData: FormData) {
     music_url: ((formData.get('music_url') as string) || null),
     category: (formData.get('category') as string) || 'Romantic',
     selected_template: (formData.get('selected_template') as string) || '001',
+    extras,
   }
 
   if (!updates.wedding_date) return { error: 'Tanggal pernikahan wajib diisi.' }
@@ -100,6 +109,7 @@ export async function updateInvitation(formData: FormData) {
 
   revalidatePath('/dashboard')
   revalidatePath(`/dashboard/editor?id=${id}`)
+  revalidatePath(`/inv/${id}`)
   return { success: true }
 }
 
