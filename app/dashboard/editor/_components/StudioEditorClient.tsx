@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState, useEffect } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,10 +40,28 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
 
   const [activeTab, setActiveTab] = useState<'mempelai' | 'acara' | 'cerita' | 'desain'>('mempelai')
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile')
+  const [previewState, setPreviewState] = useState<0 | 1>(0)
   const [palette, setPalette] = useState(PALETTES[0])
+  const [pending, startTransition] = useTransition()
   const [savedSuccess, setSavedSuccess] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  const [state, formAction, pending] = useActionState(updateInvitation, null)
+  const handleSave = () => {
+    const form = document.getElementById('editor-form') as HTMLFormElement | null
+    if (!form) return
+    const fd = new FormData(form)
+    startTransition(async () => {
+      const res = await updateInvitation(fd)
+      if (res?.error) {
+        setFormError(res.error)
+        setSavedSuccess(false)
+      } else {
+        setFormError(null)
+        setSavedSuccess(true)
+        setTimeout(() => setSavedSuccess(false), 3000)
+      }
+    })
+  }
 
   const fillTestData = () => {
     setFormData(prev => ({
@@ -66,21 +84,13 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
     setFormData(prev => ({ ...prev, [key]: val }))
   }
 
-  useEffect(() => {
-    if (state?.success) {
-      setSavedSuccess(true)
-      const t = setTimeout(() => setSavedSuccess(false), 3000)
-      return () => clearTimeout(t)
-    }
-  }, [state])
-
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b border-border sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
-            <Button variant="outline" size="sm">← Dashboard</Button>
+            <Button variant="outline" size="sm">←</Button>
           </Link>
           <div>
             <h1 className="text-base font-bold text-slate-800">Studio Editor Undangan</h1>
@@ -100,6 +110,22 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
               ⚡ Test Data
             </Button>
           )}
+
+          <div className="flex bg-slate-100 p-1 rounded-lg border">
+            <button
+              onClick={() => setPreviewState(0)}
+              className={`px-2.5 py-1 rounded text-xs font-semibold ${previewState === 0 ? 'bg-white shadow-sm text-blue-600' : 'text-slate-600'}`}
+            >
+              Cover (0)
+            </button>
+            <button
+              onClick={() => setPreviewState(1)}
+              className={`px-2.5 py-1 rounded text-xs font-semibold ${previewState === 1 ? 'bg-white shadow-sm text-blue-600' : 'text-slate-600'}`}
+            >
+              Detail (1)
+            </button>
+          </div>
+
           <div className="hidden sm:flex bg-slate-100 p-1 rounded-lg border">
             <button
               onClick={() => setPreviewDevice('mobile')}
@@ -118,7 +144,7 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
           </div>
 
           {formData.id ? (
-            <Button form="editor-form" type="submit" disabled={pending} size="sm" className="bg-blue-600">
+            <Button type="button" onClick={handleSave} disabled={pending} size="sm" className="bg-blue-600">
               {pending ? 'Menyimpan...' : savedSuccess ? '✓ Tersimpan' : 'Simpan Perubahan'}
             </Button>
           ) : (
@@ -147,9 +173,8 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-1 pb-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 transition ${
-                    active ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
+                  className={`flex-1 pb-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 transition ${active ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
@@ -158,10 +183,16 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
             })}
           </div>
 
-          <form id="editor-form" action={formAction} className="space-y-4">
+          <form id="editor-form" className="space-y-4">
             <input type="hidden" name="id" value={formData.id} />
             <input type="hidden" name="selected_template" value={formData.selected_template} />
             <input type="hidden" name="category" value={formData.category} />
+
+            {/* Hidden inputs untuk field yang ada di tab lain agar selalu terkirim */}
+            <input type="hidden" name="couple_name_male_val" value={formData.couple_name_male} />
+            <input type="hidden" name="couple_name_female_val" value={formData.couple_name_female} />
+            <input type="hidden" name="wedding_date_val" value={formData.wedding_date} />
+            <input type="hidden" name="location_val" value={formData.location} />
 
             {/* TAB: MEMPELAI */}
             {activeTab === 'mempelai' && (
@@ -302,9 +333,8 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
                         type="button"
                         key={p.name}
                         onClick={() => setPalette(p)}
-                        className={`p-3 rounded-lg border text-left flex items-center justify-between transition ${
-                          palette.name === p.name ? 'ring-2 ring-blue-600 border-blue-600' : 'hover:border-slate-300'
-                        }`}
+                        className={`p-3 rounded-lg border text-left flex items-center justify-between transition ${palette.name === p.name ? 'ring-2 ring-blue-600 border-blue-600' : 'hover:border-slate-300'
+                          }`}
                       >
                         <div className="flex items-center gap-2">
                           <span className={`w-4 h-4 rounded-full ${p.bg} border`} />
@@ -318,16 +348,15 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
               </div>
             )}
 
-            {state?.error && <p className="text-xs text-red-600 bg-red-50 p-2 rounded">{state.error}</p>}
+            {formError && <p className="text-xs text-red-600 bg-red-50 p-2 rounded">{formError}</p>}
           </form>
         </div>
 
         {/* Right Live Interactive Preview (7 cols) */}
         <div className="lg:col-span-7 bg-slate-200 p-4 md:p-8 flex items-center justify-center overflow-y-auto max-h-[calc(100vh-65px)]">
           <div
-            className={`transition-all duration-300 shadow-2xl rounded-3xl overflow-hidden border-8 border-slate-800 bg-white ${
-              previewDevice === 'mobile' ? 'w-full max-w-sm min-h-[640px]' : 'w-full max-w-2xl min-h-[600px]'
-            }`}
+            className={`transition-all duration-300 shadow-2xl rounded-3xl overflow-hidden border-8 border-slate-800 bg-white ${previewDevice === 'mobile' ? 'w-full max-w-sm min-h-[640px]' : 'w-full max-w-2xl min-h-[600px]'
+              }`}
           >
             {/* Phone Top Notch Mock */}
             <div className="bg-slate-800 h-6 w-full flex items-center justify-center">
@@ -335,50 +364,118 @@ export default function StudioEditorClient({ initialData }: { initialData?: any 
             </div>
 
             {/* Preview Document Body */}
-            <div className={`p-6 sm:p-10 ${palette.bg} min-h-full flex flex-col justify-between`}>
-              <div className="text-center space-y-4">
-                <p className={`text-xs uppercase tracking-widest font-semibold ${palette.accent}`}>
-                  The Wedding of
-                </p>
-                <h2 className={`text-3xl sm:text-4xl font-serif font-bold ${palette.accent}`}>
-                  {formData.couple_name_male} <br />
-                  <span className="text-xl">&</span> <br />
-                  {formData.couple_name_female}
-                </h2>
-                <div className={`text-xs py-2 px-4 rounded-full inline-block border ${palette.border} ${palette.accent}`}>
-                  {new Date(formData.wedding_date).toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+            {previewState === 0 ? (
+              /* STATE 0: COVER / ENVELOPE */
+              <div className={`p-8 sm:p-12 ${palette.bg} min-h-[580px] flex flex-col justify-between items-center text-center`}>
+                <div className="space-y-6 my-auto">
+                  <div className="w-16 h-16 rounded-full bg-white/80 border flex items-center justify-center mx-auto shadow-sm">
+                    <Heart className={`w-8 h-8 ${palette.accent}`} />
+                  </div>
+                  <div className="space-y-2">
+                    <p className={`text-xs uppercase tracking-widest font-semibold ${palette.accent}`}>
+                      The Wedding of
+                    </p>
+                    <h2 className={`text-3xl sm:text-4xl font-serif font-bold ${palette.accent}`}>
+                      {formData.couple_name_male} <br />
+                      <span className="text-xl">&</span> <br />
+                      {formData.couple_name_female}
+                    </h2>
+                  </div>
+                  <div className={`text-xs py-1.5 px-4 rounded-full inline-block border ${palette.border} ${palette.accent} bg-white/60`}>
+                    {new Date(formData.wedding_date).toLocaleDateString('id-ID', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </div>
+                </div>
+
+                <div className="w-full mt-8">
+                  <p className="text-[11px] text-slate-500 mb-3">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+                  <button
+                    onClick={() => setPreviewState(1)}
+                    className={`w-full py-3 rounded-xl text-white text-xs font-semibold shadow-md transition ${palette.btn}`}
+                  >
+                    💌 Buka Undangan
+                  </button>
                 </div>
               </div>
-
-              {/* Akad & Resepsi Preview Cards */}
-              <div className="my-6 space-y-3">
-                <div className="bg-white/80 backdrop-blur rounded-xl p-4 border border-white shadow-sm text-center">
-                  <h4 className="text-xs font-bold uppercase text-slate-700">Akad Nikah</h4>
-                  <p className="text-sm font-semibold text-slate-900 mt-0.5">{formData.akad_time}</p>
+            ) : (
+              /* STATE 1: FULL INVITATION DETAILS */
+              <div className={`p-6 sm:p-8 ${palette.bg} min-h-[580px] space-y-8 overflow-y-auto`}>
+                {/* Header Mempelai */}
+                <div className="text-center space-y-2">
+                  <p className={`text-[10px] uppercase tracking-widest font-bold ${palette.accent}`}>
+                    Maha Suci Allah yang telah menciptakan makhluk-Nya berpasang-pasangan
+                  </p>
+                  <h3 className={`text-2xl font-serif font-bold ${palette.accent}`}>
+                    {formData.couple_name_male} & {formData.couple_name_female}
+                  </h3>
                 </div>
-                <div className="bg-white/80 backdrop-blur rounded-xl p-4 border border-white shadow-sm text-center">
-                  <h4 className="text-xs font-bold uppercase text-slate-700">Resepsi Pernikahan</h4>
-                  <p className="text-sm font-semibold text-slate-900 mt-0.5">{formData.reception_time}</p>
-                  <p className="text-xs text-slate-600 mt-1">{formData.location}</p>
+
+                {/* Profil Mempelai */}
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="bg-white/80 p-4 rounded-xl border border-white text-center shadow-xs">
+                    <h4 className="font-bold text-sm text-slate-900">{formData.couple_name_male}</h4>
+                    <p className="text-xs text-slate-600 mt-0.5">{formData.groom_parents}</p>
+                  </div>
+                  <div className="text-center text-xs font-bold text-slate-400">&</div>
+                  <div className="bg-white/80 p-4 rounded-xl border border-white text-center shadow-xs">
+                    <h4 className="font-bold text-sm text-slate-900">{formData.couple_name_female}</h4>
+                    <p className="text-xs text-slate-600 mt-0.5">{formData.bride_parents}</p>
+                  </div>
+                </div>
+
+                {/* Acara & Waktu */}
+                <div className="space-y-3">
+                  <div className="bg-white/90 rounded-xl p-4 border border-white shadow-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Calendar className={`w-4 h-4 ${palette.accent}`} />
+                      <h4 className="text-xs font-bold uppercase text-slate-800">Akad Nikah</h4>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900">{formData.akad_time}</p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      {new Date(formData.wedding_date).toLocaleDateString('id-ID', {
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="bg-white/90 rounded-xl p-4 border border-white shadow-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin className={`w-4 h-4 ${palette.accent}`} />
+                      <h4 className="text-xs font-bold uppercase text-slate-800">Resepsi Pernikahan</h4>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900">{formData.reception_time}</p>
+                    <p className="text-xs text-slate-600 mt-1">{formData.location}</p>
+                    {formData.maps_url && (
+                      <a
+                        href={formData.maps_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-block mt-3 text-xs font-semibold underline ${palette.accent}`}
+                      >
+                        📍 Buka di Google Maps →
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Love Story */}
+                {formData.story && (
+                  <div className="bg-white/70 p-4 rounded-xl border border-white text-center space-y-1">
+                    <h5 className={`text-xs font-bold uppercase ${palette.accent}`}>Cerita Cinta</h5>
+                    <p className="text-xs text-slate-700 leading-relaxed italic">{formData.story}</p>
+                  </div>
+                )}
+
+                {/* Quote */}
+                <div className="text-center p-3 bg-white/50 rounded-xl">
+                  <p className="text-[11px] italic text-slate-600">{formData.quote}</p>
                 </div>
               </div>
-
-              {/* Quote */}
-              <div className="text-center p-4 bg-white/50 rounded-xl">
-                <p className="text-xs italic text-slate-700">{formData.quote}</p>
-              </div>
-
-              <div className="mt-6 text-center">
-                <button className={`w-full py-2.5 rounded-xl text-white text-xs font-semibold shadow-md ${palette.btn}`}>
-                  Buka Undangan & RSVP
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
